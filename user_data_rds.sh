@@ -49,10 +49,17 @@ docker-compose up -d
 mkdir -p /home/ec2-user/n8n
 cd /home/ec2-user/n8n
 
-# Criar o arquivo Docker Compose para o n8n
+# Criar o arquivo Docker Compose para o n8n e Redis
 cat <<EOF > docker-compose.yml
 version: "3"
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+  
   n8n:
     image: n8nio/n8n
     container_name: n8n
@@ -62,15 +69,24 @@ services:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=${RDS_HOST}
+      - DB_POSTGRESDB_DATABASE=${RDS_DB}
+      - DB_POSTGRESDB_USER=${RDS_USER}
+      - DB_POSTGRESDB_PASSWORD=${RDS_PASSWORD}
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
     volumes:
       - ~/.n8n:/root/.n8n
+    depends_on:
+      - redis
     restart: always
 EOF
 
-# Subir o n8n com Docker Compose
+# Subir os containers com Docker Compose
 docker-compose up -d
 
 # Finalizar
-echo "Docker, Evolution API, n8n configurados com sucesso!"
+echo "Docker, Evolution API, Redis e n8n configurados com sucesso!"
 echo "Conexão com RDS PostgreSQL estabelecida."
 echo "Você pode acessar o n8n na URL: http://<IP_da_Instancia>:5678"

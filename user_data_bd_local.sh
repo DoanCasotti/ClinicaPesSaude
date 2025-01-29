@@ -46,10 +46,17 @@ docker-compose up -d
 mkdir -p /home/ec2-user/n8n
 cd /home/ec2-user/n8n
 
-# Criar o arquivo Docker Compose para o n8n
+# Criar o arquivo Docker Compose para o n8n e Redis
 cat <<EOF > docker-compose.yml
 version: "3"
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+  
   n8n:
     image: n8nio/n8n
     container_name: n8n
@@ -59,14 +66,18 @@ services:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
     volumes:
       - ~/.n8n:/root/.n8n
+    depends_on:
+      - redis
     restart: always
 EOF
 
-# Subir o n8n com Docker Compose
+# Subir os containers com Docker Compose
 docker-compose up -d
 
 # Finalizar
-echo "PostgreSQL local, Docker, Evolution API e n8n instalados com sucesso!"
+echo "PostgreSQL local, Docker, Redis, Evolution API e n8n instalados com sucesso!"
 echo "Você pode acessar o n8n na URL: http://<IP_da_Instancia>:5678"

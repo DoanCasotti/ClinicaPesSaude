@@ -86,7 +86,7 @@ EOF
 # Subir os containers com Docker Compose
 docker-compose up -d
 
-# Finalizar
+# Finalizar echo
 echo "Docker, Evolution API, Redis e n8n configurados com sucesso!"
 echo "Conexão com RDS PostgreSQL estabelecida."
 echo "Você pode acessar o n8n na URL: http://<IP_da_Instancia>:5678"
